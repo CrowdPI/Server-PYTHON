@@ -16,8 +16,7 @@ def get_changelog():
 
 @server.route('/ingredients/<id>', methods=['GET'])
 def get_ingredient(id):
-
-# EXTRACT : variables from request
+    # EXTRACT : variables from request
     update_ingredient_summary = request.args.get('update_ingredient_summary')
 
     # FIND : ingredient from INGREDIENTS list
