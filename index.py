@@ -2,12 +2,17 @@ from flask import Flask, request, jsonify
 
 # CONSTS
 from consts.ingredients import INGREDIENTS
+from version import CHANGE_LOG
 
 server = Flask(__name__)
 
 @server.route('/', methods=['GET'])
 def hello_world():
     return jsonify({"message": "Hello, World! Time for Pie 🥧"})
+
+@server.route('/changelog', methods=['GET'])
+def get_changelog():
+    return jsonify({"changelog": CHANGE_LOG}), 200
 
 @server.route('/ingredients/<id>', methods=['GET'])
 def get_ingredient(id):
