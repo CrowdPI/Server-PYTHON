@@ -4,5 +4,4 @@ INGREDIENTS = [
         "name": "Sugar",
         "summary": None
     },
-    
 ]
