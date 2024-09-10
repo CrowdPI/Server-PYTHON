@@ -31,7 +31,7 @@ class Ingredient(Base):
     def __repr__(self):
         return f'id: {self.id} - name: {self.name}'
 
-class Product_Ingredients(Base):
+class ProductIngredient(Base):
     __tablename__ = 'product_ingredients'
 
     id = Column(Integer, primary_key=True)
@@ -43,4 +43,18 @@ class Product_Ingredients(Base):
     ingredient = relationship('Ingredient', back_populates='products')
 
     def __repr__(self):
-        return f'id: {self.id} - product_id: {self.product_id} - ingredient_id: {self.ingredient_id}'
+        return f'id: {self.id} - product_id: {self.product_id} - ingredient_id: {self.ingredient_id} - quantity: {self.quantity}'
+
+class IngredientComponent(Base):
+    __tablename__ = 'ingredient_components'
+
+    id = Column(Integer, primary_key=True)
+    ingredient_id = Column(Integer, ForeignKey('ingredients.id'), nullable=False)
+    component_id = Column(Integer, ForeignKey('ingredients.id'), nullable=False)
+
+    # Establish relationships
+    ingredient = relationship('Ingredient', foreign_keys=[ingredient_id], back_populates='components')
+    component = relationship('Ingredient', foreign_keys=[component_id])
+
+    def __repr__(self):
+        return f'id: {self.id} - ingredient_id: {self.ingredient_id} - component_id: {self.component_id} - quantity: {self.quantity}'
