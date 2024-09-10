@@ -1,6 +1,7 @@
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from datetime import datetime
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -66,3 +67,12 @@ class IngredientComponent(Base):
 
     def __repr__(self):
         return f'id: {self.id} - ingredient_id: {self.ingredient_id} - component_id: {self.component_id}'
+
+class Summary(Base):
+    __tablename__ = 'summaries'
+
+    id = Column(Integer, primary_key=True)
+    ingredient_id = Column(Integer, ForeignKey('ingredients.id'), nullable=True)
+    product_id = Column(Integer, ForeignKey('products.id'), nullable=True)
+    text = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)

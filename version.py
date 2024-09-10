@@ -1,6 +1,14 @@
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 CHANGE_LOG = [
+    {
+        "version": "0.0.3",
+        "date": "09-10-2024",
+        "changes": [
+            "Set Postgres timezone to UTC",
+            "Added SUMMARIES table",
+        ]
+    },
     {
         "version": "0.0.2",
         "date": "09-09-2024",
@@ -8,6 +16,7 @@ CHANGE_LOG = [
             "Updated README",
             "CORS",
             "Added LOCAL Postgres Database",
+            "Added PRODUCTS / INGREDIENTS / PRODUCT_INGREDIENTS / INGREDIENTS_COMPONENTS tables"
         ]
     },
     {

@@ -31,10 +31,16 @@ CORS(server, resources={r"/*": {"origins": "*"}})  # Allow all origins
 
 # CONFIGURE > database
 server.config['SQLALCHEMY_DATABASE_URI']=os.environ.get('DATABASE_URL')
+server.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "connect_args": {"options": "-c timezone=utc"}
+}
 db.init_app(server)
 
 # CONFIGURE > SQLAlchemy enginer
-engine = create_engine(os.getenv('DATABASE_URL'))
+engine = create_engine(
+    os.getenv('DATABASE_URL'), 
+    connect_args={"options": "-c timezone=utc"}
+)
 Session = sessionmaker(bind=engine)
 session = Session()
 
