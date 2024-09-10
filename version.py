@@ -1,4 +1,4 @@
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 CHANGE_LOG = [
     {
@@ -6,9 +6,10 @@ CHANGE_LOG = [
         "date": "09-09-2024",
         "changes": [
             "Updated README",
-            "CORS"
+            "CORS",
+            "Added LOCAL Postgres Database",
         ]
-    }
+    },
     {
         "version": "0.0.1",
         "date": "09-03-2024",
