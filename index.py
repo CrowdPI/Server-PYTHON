@@ -3,7 +3,10 @@ from dotenv import load_dotenv
 import os
 from flask import Flask, request, jsonify
 # IMPORTS > database
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from database import db 
+
 # IMPORTS > cors
 from flask_cors import CORS
 
@@ -27,7 +30,12 @@ CORS(server, resources={r"/*": {"origins": "*"}})  # Allow all origins
 
 # CONFIGURE > database
 server.config['SQLALCHEMY_DATABASE_URI']=os.environ.get('DATABASE_URL')
-db = SQLAlchemy(server)
+db.init_app(server)
+
+# CONFIGURE > SQLAlchemy enginer
+engine = create_engine(os.getenv('DATABASE_URL'))
+Session = sessionmaker(bind=engine)
+session = Session()
 
 @server.route('/', methods=['GET'])
 def hello_world():
@@ -40,13 +48,13 @@ def get_changelog():
 # ROUTES > Ingredients
 @server.route('/ingredients', methods=["GET"])
 def get_ingredients():
-    ingredients = Ingredient.query.order_by(Ingredient.name.asc()).all()
+    ingredients = session.query(Ingredient).order_by(Ingredient.name.asc()).all()
     return jsonify([{"id": ing.id, "name": ing.name} for ing in ingredients]), 200
 
 @server.route('/ingredients/<id>', methods=['GET'])
 def get_ingredient(id):
     # Query the database for a single ingredient by ID
-    ingredient = Ingredient.query.get(int(id))
+    ingredient = session.query(Ingredient).get(int(id))
     
     # Check if the ingredient exists
     if ingredient is None:
