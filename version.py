@@ -2,6 +2,14 @@ __version__ = "0.0.1"
 
 CHANGE_LOG = [
     {
+        "version": "0.0.2",
+        "date": "09-09-2024",
+        "changes": [
+            "Updated README",
+            "CORS"
+        ]
+    }
+    {
         "version": "0.0.1",
         "date": "09-03-2024",
         "changes": [
