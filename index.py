@@ -11,7 +11,8 @@ from database import db
 from flask_cors import CORS
 
 # IMPORTS > models
-from models import Ingredient  # Import the Ingredient model
+from models import Ingredient
+from models import Product
 
 # IMPORTS > consts
 from consts.ingredients import INGREDIENTS
@@ -44,6 +45,12 @@ def hello_world():
 @server.route('/changelog', methods=['GET'])
 def get_changelog():
     return jsonify({"changelog": CHANGE_LOG}), 200
+
+# ROUTES > Ingredients
+@server.route('/products', methods=["GET"])
+def get_products():
+    products = session.query(Product).order_by(Product.name.asc()).all()
+    return jsonify([{"id": ing.id,"brand_name": ing.brand_name, "name": ing.name} for ing in products]), 200
 
 # ROUTES > Ingredients
 @server.route('/ingredients', methods=["GET"])

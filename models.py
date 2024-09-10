@@ -13,7 +13,7 @@ class Product(Base):
     name = Column(String(60), unique=True, nullable=False)
 
     # RELATIONSHIP(s) 
-    ingredients = relationship('Product_Ingredients', back_populates='product')
+    ingredients = relationship('ProductIngredient', back_populates='product')
 
     def __repr__(self):
         return f'id: {self.id} - brand_name: {self.brand_name} > name: {self.name}'
@@ -26,12 +26,17 @@ class Ingredient(Base):
     alias = Column(String(60), unique=True, nullable=True)
 
     # RELATIONSHIP(s)
-    products = relationship('Product_Ingredients', back_populates='ingredient')
+    products = relationship('ProductIngredient', back_populates='ingredient')
+    components = relationship('IngredientComponent', foreign_keys='IngredientComponent.ingredient_id', back_populates='ingredient')
+    component_of = relationship('IngredientComponent', foreign_keys='IngredientComponent.component_id', back_populates='component')
 
     def __repr__(self):
         return f'id: {self.id} - name: {self.name}'
 
 class ProductIngredient(Base):
+    """
+        This table will store the relationship between products and their ingredients. It will help in associating multiple ingredients with a single product.
+    """
     __tablename__ = 'product_ingredients'
 
     id = Column(Integer, primary_key=True)
@@ -43,9 +48,12 @@ class ProductIngredient(Base):
     ingredient = relationship('Ingredient', back_populates='products')
 
     def __repr__(self):
-        return f'id: {self.id} - product_id: {self.product_id} - ingredient_id: {self.ingredient_id} - quantity: {self.quantity}'
+        return f'id: {self.id} - product_id: {self.product_id} - ingredient_id: {self.ingredient_id}'
 
 class IngredientComponent(Base):
+    """
+        This table handles cases where ingredients are composed of other ingredients. For example, "Enriched Macaroni" is composed of "Wheat Flour", "Durum Flour", etc.
+    """
     __tablename__ = 'ingredient_components'
 
     id = Column(Integer, primary_key=True)
@@ -54,7 +62,7 @@ class IngredientComponent(Base):
 
     # Establish relationships
     ingredient = relationship('Ingredient', foreign_keys=[ingredient_id], back_populates='components')
-    component = relationship('Ingredient', foreign_keys=[component_id])
+    component = relationship('Ingredient', foreign_keys=[component_id], back_populates='component_of')
 
     def __repr__(self):
-        return f'id: {self.id} - ingredient_id: {self.ingredient_id} - component_id: {self.component_id} - quantity: {self.quantity}'
+        return f'id: {self.id} - ingredient_id: {self.ingredient_id} - component_id: {self.component_id}'
