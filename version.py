@@ -1,6 +1,14 @@
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 
 CHANGE_LOG = [
+    {
+        "version": "0.0.4",
+        "date": "09-11-2024",
+        "changes": [
+            "Added summaries.wikipedia column to postgres database",
+            "ROUTE (PUT): /ingredients/<id>/summarize/source/<source>. Currently only summarizing the stored wikipedia page for a passed ingredient id"
+        ]
+    },
     {
         "version": "0.0.3",
         "date": "09-10-2024",

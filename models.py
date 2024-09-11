@@ -26,6 +26,8 @@ class Ingredient(Base):
     name = Column(String(60), unique=True, nullable=False)
     alias = Column(String(60), unique=True, nullable=True)
 
+    wikipedia = Column(String(60), unique=True, nullable=False)
+
     # RELATIONSHIP(s)
     products = relationship('ProductIngredient', back_populates='ingredient')
     components = relationship('IngredientComponent', foreign_keys='IngredientComponent.ingredient_id', back_populates='ingredient')
