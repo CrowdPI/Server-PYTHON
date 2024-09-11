@@ -77,4 +77,5 @@ class Summary(Base):
     ingredient_id = Column(Integer, ForeignKey('ingredients.id'), nullable=True)
     product_id = Column(Integer, ForeignKey('products.id'), nullable=True)
     text = Column(Text, nullable=False)
+    model = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)

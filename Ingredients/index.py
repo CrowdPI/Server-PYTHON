@@ -1,6 +1,6 @@
 # IMPORTS
 import os
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 
 # IMPORTS > database
 from models import Ingredient
@@ -45,18 +45,19 @@ def get_ingredient(id):
 
 # ROUTES > LLMs
 # ROUTES > LLMs : summarize ingredient
-@ingredients_blueprint.route('/ingredients/<id>/summarize', methods=['PUT'])
-# @traceable # TODO:    i need to add this tracable decorator but it is not pushing anything to langsmith
-#                       i _think_ i need to further extract / separate the flask route from the underlying function
-#                       and then only trace the function?    
+@ingredients_blueprint.route('/ingredients/<id>/summarize', methods=['PUT']) # TODO: add a query param for model and set default to "gpt-4o"
 def summarize_ingredient(id):
+    # EXTRACT: model from query
+    model = request.args.get('model', 'gpt-4o')
+    print(f'THE MODEL\n{model}')
+
     # FETCH: ingredient from database
     ingredient = session.query(Ingredient).get(int(id))
     if ingredient is None:
         return jsonify({"error": "Ingredient not found"}), 204
 
     # CREATE: llm instance
-    llm = ChatOpenAI()
+    llm = ChatOpenAI(model=model)
 
     #############################################
     # Summarize Ingredient (V1 - Simple Prompt) #
@@ -81,7 +82,8 @@ def summarize_ingredient(id):
     summary_text = result.content
     new_summary = Summary(
         ingredient_id=int(id),
-        text=summary_text
+        text=summary_text,
+        model=model
     )
     session.add(new_summary)
     session.commit()
@@ -109,13 +111,16 @@ def summarize_ingredient_wikipedia(id, source):
     Links:
         - Main Class ipynb: https://github.com/BloomTechAI/1.3-langsmith-langfuse/blob/e12b955ea9818d0d288f688f14b332d7eedd66ae/langsmith_rag.ipynb#L12
     """
+    # EXTRACT: model from query
+    model = request.args.get('model', 'gpt-4o')
+
     # Fetch ingredient from database
     ingredient = session.query(Ingredient).get(int(id))
     if (ingredient is None or ingredient.wikipedia is None):
         return jsonify({"error": "Ingredient or Wikipedia page not found"}), 204
 
     # CREATE: llm instance
-    llm = ChatOpenAI()
+    llm = ChatOpenAI(model=model)
 
     ##########################
     # PROCESS WIKIPEDIA PAGE #
@@ -180,7 +185,8 @@ def summarize_ingredient_wikipedia(id, source):
     summary_text = result
     new_summary = Summary(
         ingredient_id=int(id),
-        text=summary_text
+        text=summary_text,
+        model=model
     )
     session.add(new_summary)
     session.commit()

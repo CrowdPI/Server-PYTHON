@@ -6,7 +6,8 @@ CHANGE_LOG = [
         "date": "09-11-2024",
         "changes": [
             "Added summaries.wikipedia column to postgres database",
-            "ROUTE (PUT): /ingredients/<id>/summarize/source/<source>. Currently only summarizing the stored wikipedia page for a passed ingredient id"
+            "Added summaries.model column to postgres database",
+            "ROUTE (PUT): /ingredients/<id>/summarize/source/<source>. Currently only summarizing the stored wikipedia page for a passed ingredient id",
         ]
     },
     {
