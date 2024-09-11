@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify
 
 # IMPORTS > routes
 from Ingredients.index import ingredients_blueprint
+from Summaries.index import summaries_blueprint
 
 # IMPORTS > SQLAlchemy
 from sqlAlchemy import session
@@ -58,6 +59,9 @@ def get_products():
 
 # REGISTER > Ingredients blueprint
 server.register_blueprint(ingredients_blueprint)
+
+# REGISTER > Summaries blueprint
+server.register_blueprint(summaries_blueprint)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
