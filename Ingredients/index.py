@@ -34,14 +34,14 @@ def format_docs(docs):
 @ingredients_blueprint.route('/ingredients', methods=["GET"])
 def get_ingredients():
     ingredients = session.query(Ingredient).order_by(Ingredient.name.asc()).all()
-    return jsonify([{"id": ing.id, "name": ing.name} for ing in ingredients]), 200
+    return jsonify([{"id": ing.id, "name": ing.name, "alias": ingredient.alias} for ing in ingredients]), 200
 
 @ingredients_blueprint.route('/ingredients/<id>', methods=['GET'])
 def get_ingredient(id):
     ingredient = session.query(Ingredient).get(int(id))
     if ingredient is None:
         return jsonify({"error": "Ingredient not found"}), 204
-    return jsonify({"id": ingredient.id, "name": ingredient.name}), 200
+    return jsonify({"id": ingredient.id, "name": ingredient.name, "alias": ingredient.alias}), 200
 
 # ROUTES > LLMs
 # ROUTES > LLMs : summarize ingredient
