@@ -7,7 +7,7 @@ CHANGE_LOG = [
         "changes": [
             "Set Postgres timezone to UTC",
             "Added SUMMARIES table",
-            "Upsert Ingredient Summary - V1 Simple Prompt"
+            "Upsert Ingredient Summary - V1 Simple Prompt w/ LangChain Tracing",
         ]
     },
     {
