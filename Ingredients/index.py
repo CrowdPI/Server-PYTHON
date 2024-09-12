@@ -193,6 +193,7 @@ def summarize_ingredient_wikipedia(id, source):
     ##########################
     # LOADER
     loader = WikipediaLoader(query=ingredient.name, load_max_docs=1)
+    # loader = WikipediaLoader(query="NASCAR", load_max_docs=1) # intentionally break the context
     
     # DOCUMENTS
     documents = loader.load()
