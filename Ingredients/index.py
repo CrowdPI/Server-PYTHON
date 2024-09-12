@@ -1,5 +1,8 @@
 # IMPORTS
 import os
+import json
+
+# IMPORTS > api server
 from flask import Blueprint, jsonify, request
 
 # IMPORTS > database
@@ -14,14 +17,17 @@ import bs4
 import openai
 from langsmith.wrappers import wrap_openai
 from langsmith import traceable
-from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import WikipediaLoader
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.runnables import RunnablePassthrough
+from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.prompts import PromptTemplate
 from langchain.schema.output_parser import StrOutputParser
+from typing import Optional
+# IMPORT > LLMs > CREATE_langchain_openai_ChatOpenAI function
+from utils.langchain_openai_ChatOpenAI import CREATE_langchain_openai_ChatOpenAI
 
 ingredients_blueprint = Blueprint('ingredients', __name__)
 
@@ -34,17 +40,36 @@ def format_docs(docs):
 @ingredients_blueprint.route('/ingredients', methods=["GET"])
 def get_ingredients():
     ingredients = session.query(Ingredient).order_by(Ingredient.name.asc()).all()
-    return jsonify([{"id": ing.id, "name": ing.name, "alias": ingredient.alias} for ing in ingredients]), 200
+    return jsonify([{
+        "id": ing.id,
+        "name": ing.name,
+        "alias": ing.alias
+    } for ing in ingredients]), 200
 
 @ingredients_blueprint.route('/ingredients/<id>', methods=['GET'])
 def get_ingredient(id):
     ingredient = session.query(Ingredient).get(int(id))
     if ingredient is None:
         return jsonify({"error": "Ingredient not found"}), 204
-    return jsonify({"id": ingredient.id, "name": ingredient.name, "alias": ingredient.alias}), 200
+    return jsonify({
+        "id": ingredient.id,
+        "name": ingredient.name,
+        "alias": ingredient.alias
+    }), 200
 
 # ROUTES > LLMs
 # ROUTES > LLMs : summarize ingredient
+
+class ChatOpenAI_Summary(BaseModel):
+    """
+    Summarize a specified dietary ingredient.
+    """
+
+    summary: str = Field(description="The summary of the specified dietary ingredient.")
+    warnings: str = Field(description="A highlight of any potential health risks associated with the specified dietary ingredient.")
+    health_rating: Optional[int] = Field(description="based on the specified dietary ingredients summary & warnings rank how healthy the ingredient is to consume from a 1 to 10 scale.")
+    modified_rating: Optional[int] = Field(description="based on the specified dietary ingredients summary & warnings rank how healthy the ingredient is to consume from a scale of [1,2,3,4,5,6,8,9,10] (you cannot pick 7).")
+
 @ingredients_blueprint.route('/ingredients/<id>/summarize', methods=['PUT']) # TODO: add a query param for model and set default to "gpt-4o"
 def summarize_ingredient(id):
     # EXTRACT: model from query
@@ -57,32 +82,63 @@ def summarize_ingredient(id):
         return jsonify({"error": "Ingredient not found"}), 204
 
     # CREATE: llm instance
-    llm = ChatOpenAI(model=model)
+    llm = CREATE_langchain_openai_ChatOpenAI(
+        model=model,
+        temperature=0,
+        max_tokens=None,
+        json_mode=True
+        # logprobs=
+        # stream_options=
+    )
+
+    print(f'🔎 THE LLM\n{llm}')
+    print(f'\t1 - THE LLM client\n\t\t{llm.client}')
+    print(f'\t2 - THE LLM async_client\n\t\t{llm.async_client}')
+    print(f'\t3 - THE LLM root_client\n\t\t{llm.root_client}')
+    print(f'\t4 - THE LLM root_async_client\n\t\t{llm.root_async_client}')
+    print(f'\t5 - THE LLM model_name\n\t\t{llm.model_name}')
+    print(f'\t6 - THE LLM openai_api_key\n\t\t{llm.openai_api_key}')
+    print(f'\t7 - THE LLM openai_proxy\n\t\t{llm.openai_proxy}')
+
+    # CREATE: structured llm instance
+    structured_llm = llm.with_structured_output(ChatOpenAI_Summary)
 
     #############################################
     # Summarize Ingredient (V1 - Simple Prompt) #
     #############################################
-    # CONFIGURE: single shot input
-    input = f"""
-        You are a nutritionist. Please summarize the following cooking ingredient:
-        {ingredient.name}
-    """
+    # CONFIGURE: prompt
+    messages = [
+        (
+            "system",
+            f"""
+                You are a helpful nutritionist that is tasked with providing a facts based summary of a provided dietary ingredient. Do not mention who or what you are in your summarization.
+            """
+        ),
+        (
+            "human",
+            f"""
+                Please summarize the following ingredient: {ingredient.name}.
 
-    result = llm.invoke(input)
-    # print(f'1 - THE RESULT {result}')
-    # print(f'2 - THE RESULT.content {result.content}')
-    # print(f'3 - THE RESULT.additional_kwargs {result.additional_kwargs}')
-    # print(f'4 - THE RESULT.response_metadata {result.response_metadata}')
-    # print(f'5 - THE RESULT.id {result.id}')
-    # print(f'6 - THE RESULT.usage_metadata {result.usage_metadata}')
+                Along with the summary please provide a highlighted section for any warnings or negative aspects of the ingredient in question.
+            """
+        ),
+    ]
+    print(f'WHAT IS THE MESSAGE\n{messages}')
+    result = structured_llm.invoke(messages)
+    print(f'THE RESULT {result}')
+    print(f'\t1 - THE RESULT.summary\n\t\t{result.summary}')
+    print(f'\t2 - THE RESULT.warnings\n\t\t{result.warnings}')
+    print(f'\t3 - THE RESULT.health_rating\n\t\t{result.health_rating}')
+    print(f'\t4 - THE RESULT.modified_rating\n\t\t{result.modified_rating}')
 
     ###############################
     # UPDATE > ingredient summary #
     ###############################
-    summary_text = result.content
+    summary_text = result.summary
     new_summary = Summary(
         ingredient_id=int(id),
         text=summary_text,
+        warnings=result.warnings,
         model=model
     )
     session.add(new_summary)
@@ -91,7 +147,7 @@ def summarize_ingredient(id):
     ##########
     # RETURN #
     ##########
-    return jsonify(summary_text), 200
+    return jsonify('success'), 200
 
 @ingredients_blueprint.route('/ingredients/<id>/summarize/source/<source>', methods=['PUT'])
 def summarize_ingredient_wikipedia(id, source):
@@ -120,7 +176,17 @@ def summarize_ingredient_wikipedia(id, source):
         return jsonify({"error": "Ingredient or Wikipedia page not found"}), 204
 
     # CREATE: llm instance
-    llm = ChatOpenAI(model=model)
+    llm = CREATE_langchain_openai_ChatOpenAI(
+        model=model,
+        temperature=0,
+        max_tokens=None,
+        json_mode=True
+        # logprobs=
+        # stream_options=
+    )
+
+    # CREATE: structured llm instance
+    structured_llm = llm.with_structured_output(ChatOpenAI_Summary)
 
     ##########################
     # PROCESS WIKIPEDIA PAGE #
@@ -154,7 +220,10 @@ def summarize_ingredient_wikipedia(id, source):
 
     # PROMPT
     prompt_template = PromptTemplate.from_template("""
-        You are a nutritionist AI that is tasked with providing a facts based summary of a provided Wikipedia webpage. Do not mention who or what you are in your summarization. Focus your response on the nutritional aspects of the Wikipedia webpage.
+        You are a nutritionist AI that is tasked with providing a facts based summary of a provided Wikipedia webpage. 
+        Focus your response on the nutritional aspects of the Wikipedia webpage.
+
+        Do not mention who or what you are in your summarization. 
 
         Context: {context}
     """)
@@ -166,8 +235,7 @@ def summarize_ingredient_wikipedia(id, source):
             "question": RunnablePassthrough()
         }
         | prompt_template
-        | llm
-        | StrOutputParser()
+        | structured_llm
     )
     print(f'THE RAG CHAIN\n{rag_chain}\n')
 
@@ -178,20 +246,25 @@ def summarize_ingredient_wikipedia(id, source):
         Please summarize the following cooking ingredient:
     """)
     print(f'🎉 THE RESULT\n{result}')
+    print(f'\t1 - THE RESULT.summary\n\t\t{result.summary}')
+    print(f'\t2 - THE RESULT.warnings\n\t\t{result.warnings}')
+    print(f'\t3 - THE RESULT.health_rating\n\t\t{result.health_rating}')
+    print(f'\t4 - THE RESULT.modified_rating\n\t\t{result.modified_rating}')
 
-        ###############################
+    ###############################
     # UPDATE > ingredient summary #
     ###############################
-    summary_text = result
+    summary_text = result.summary
     new_summary = Summary(
         ingredient_id=int(id),
         text=summary_text,
+        warnings=result.warnings,
         model=model
     )
     session.add(new_summary)
     session.commit()
 
     # Placeholder return statement
-    return jsonify(result), 200
+    return jsonify('success'), 200
 
     

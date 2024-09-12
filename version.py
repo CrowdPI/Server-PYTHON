@@ -8,6 +8,7 @@ CHANGE_LOG = [
             "Added summaries.wikipedia column to postgres database",
             "Added summaries.model column to postgres database",
             "ROUTE (PUT): /ingredients/<id>/summarize/source/<source>. Currently only summarizing the stored wikipedia page for a passed ingredient id",
+            "Extract & Improved the use of LancChain > OpenAI > ChatOpenAI w/ JSON structure",
         ]
     },
     {

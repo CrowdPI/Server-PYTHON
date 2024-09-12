@@ -18,5 +18,11 @@ def get_ingredient_summaries(id):
     if summaries is None:
         return jsonify([]), 200  # Return an empty array with 200 OK status
     else :
-        result = jsonify([{"id": ing.id, "text": ing.text, "created_at": ing.created_at, "model": ing.model} for ing in summaries])
+        result = jsonify([{
+            "id": ing.id, 
+            "text": ing.text, 
+            "created_at": ing.created_at, 
+            "model": ing.model,
+            "warnings": ing.warnings,
+        } for ing in summaries])
         return result, 200
