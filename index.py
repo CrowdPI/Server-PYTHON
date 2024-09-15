@@ -22,7 +22,6 @@ from models import Product
 from models import Summary
 
 # IMPORTS > consts
-from consts.ingredients import INGREDIENTS
 from version import CHANGE_LOG
 
 # LOAD > environment variables from .env file

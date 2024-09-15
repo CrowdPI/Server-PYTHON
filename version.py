@@ -2,6 +2,13 @@ __version__ = "0.0.4"
 
 CHANGE_LOG = [
     {
+        "version": "0.0.5",
+        "date": "09-15-2024",
+        "changes": [
+            "Extracted underling function calls to their respective directories / classes"
+        ]
+    },
+    {
         "version": "0.0.4",
         "date": "09-11-2024",
         "changes": [
