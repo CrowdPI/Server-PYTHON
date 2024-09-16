@@ -5,7 +5,8 @@ CHANGE_LOG = [
         "version": "0.0.5",
         "date": "09-15-2024",
         "changes": [
-            "Extracted underling function calls to their respective directories / classes"
+            "Extracted underling function calls to their respective directories / classes",
+            "V1 Attempt (not working) at tool-calls & rag chain combination"
         ]
     },
     {

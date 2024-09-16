@@ -27,5 +27,8 @@ class LangChain_OpenAI_ChatOpenAI:
             return llm.bind(response_format={"type": "json_object"})
         return llm
 
+    def bind_tools(self, tools):
+        self.llm.bind_tools(tools)
+
     def get_llm(self):
         return self.llm
