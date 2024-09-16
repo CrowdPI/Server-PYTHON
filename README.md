@@ -21,19 +21,36 @@
     ```
 
 ## Setup
-1. Create Virtual Environment (adds venv directory to project)
-```bash
-python3 -m venv venv
-```
+1. Install Postgres
+    ```
+    brew install postgresql@14
+    ```
 
-2. Active Virtual Environment
-```bash
-source venv/bin/activate
-```
+2. Start Postgres
+    ```
+    brew services run postgresql@14
+    ```
+
+3. Create Database
+    ```
+    psql postgres
+
+    postgres=# create database crowdpi;
+    ```
+
+4. Create Virtual Environment (adds venv directory to project)
+    ```bash
+    python3 -m venv venv
+    ```
+
+5. Active Virtual Environment
+    ```bash
+    source venv/bin/activate
+    ```
 
 > you should see `(venv)` at the beginning of your prompt indicating you are in the `venv` virtual environment
 
-3. Install Project Packages into Active Virtual Environment
+6. Install Project Packages into Active Virtual Environment
 
     ```bash
     pip3 install -r requirements.txt
@@ -46,8 +63,7 @@ source venv/bin/activate
         pip3 freeze > requirements.txt
         ```
 
-4. Run Server
-
-```bash
-python3 index.py
-```
+7. Run Server
+    ```bash
+    python3 index.py
+    ```
