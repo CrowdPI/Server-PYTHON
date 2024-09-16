@@ -145,8 +145,8 @@ def summarize_ingredient_single_source(id):
     # RETURN
     return jsonify('success'), 200
 
-@ingredients_blueprint.route('/ingredients/<id>/summarize/source/<source>', methods=['PUT'])
-def summarize_ingredient(id, source):
+@ingredients_blueprint.route('/ingredients/<id>/summarize/ragchain/<source>', methods=['PUT'])
+def summarize_ingredient_ragchain(id, source):
     """
     Summarize ingredient information from a specified source.
 
