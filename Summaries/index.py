@@ -21,8 +21,9 @@ def get_ingredient_summaries(id):
         result = jsonify([{
             "id": ing.id, 
             "text": ing.text, 
-            "created_at": ing.created_at, 
-            "model": ing.model,
             "warnings": ing.warnings,
+            "model": ing.model,
+            "sources": ing.sources,
+            "created_at": ing.created_at, 
         } for ing in summaries])
         return result, 200

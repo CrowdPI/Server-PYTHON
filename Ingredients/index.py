@@ -19,7 +19,6 @@ from langsmith.wrappers import wrap_openai
 from langsmith import traceable
 from langchain_openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.document_loaders import WikipediaLoader
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.pydantic_v1 import BaseModel, Field
@@ -27,10 +26,16 @@ from langchain.prompts import PromptTemplate
 from langchain.schema.output_parser import StrOutputParser
 from typing import Optional
 # IMPORT > LLMs
-from LLMs.LangChain.document_loaders.WikipediaLoader import LangChain_WikipediaLoader
+# IMPORT > LLMs
+from langchain_core.documents import Document
 from LLMs.LangChain.text_splitters.RecursiveCharacterTextSplitter import LangChain_RecursiveTextSplitter
 from LLMs.LangChain.vector_stores.Chroma.index import LangChain_Chroma
 from LLMs.LangChain.OpenAI.ChatOpenAI import LangChain_OpenAI_ChatOpenAI
+from langchain_community.vectorstores.utils import filter_complex_metadata
+
+# IMPORT > LLMs > Document Loaders
+from LLMs.LangChain.document_loaders.PubMedLoader import LangChain_PubMedLoader
+from LLMs.LangChain.document_loaders.WikipediaLoader import LangChain_WikipediaLoader
 # IMPORT > LLMs > tools
 from LLMs.LangChain.tools.LangChain_WikipediaLoader import TOOL_LangChain_WikipediaLoader
 # IMPORT > tools
@@ -132,7 +137,8 @@ def summarize_ingredient(id):
         ingredient_id=int(id), 
         summary=result.summary, 
         warnings=result.warnings,
-        model=model
+        model=model,
+        sources=['ChatOpenAI']
     )
 
     # RETURN
@@ -185,12 +191,36 @@ def summarize_ingredient_wikipedia(id, source):
         warnings: str = Field(description="A highlight of any potential health risks associated with the specified dietary ingredient.")
     structured_llm = llm.with_structured_output(ChatOpenAI_Summary)
 
-    # CONVERT: Wikipedia page into individual "documents"
-    CLASS_INSTANCE_LangChain_WikipediaLoader = LangChain_WikipediaLoader(
-        query=ingredient.name
-    )
-    documents = CLASS_INSTANCE_LangChain_WikipediaLoader.call_loader()
-    # print(f'THE DOCUMENTS\n{documents}')
+    if source == 'wikipedia':
+        # CONVERT: Wikipedia page into individual "documents"
+        CLASS_INSTANCE_LangChain_WikipediaLoader = LangChain_WikipediaLoader(
+            query=ingredient.name
+        )
+        documents = CLASS_INSTANCE_LangChain_WikipediaLoader.call_loader()
+        # print(f'THE DOCUMENTS\n{documents}')
+    
+
+    if source == 'pubmed':
+        CLASS_INSTANCE_LangChain_PubMed = LangChain_PubMedLoader(
+            query=ingredient.name
+        )
+        documents = CLASS_INSTANCE_LangChain_PubMed.load()
+
+        # Filter complex metadata
+        for doc in documents:
+            if isinstance(doc.metadata, Document):
+                doc.metadata = filter_complex_metadata(doc.metadata)
+            else:
+                # If metadata is a string or not a dict, handle it accordingly
+                doc.metadata = {"note": "No structured metadata available"}
+                
+            doc_dict = {
+                "page_content": doc.page_content,
+                "metadata": doc.metadata
+            }
+            # print('THE CURRENT DOCUMENT:')
+            # print(json.dumps(doc_dict, indent=4, default=str))
+
 
     # CONVERT: document to chunks w/ text splitter
     CLASS_INSTANCE_LangChain_RecursiveTextSplitter = LangChain_RecursiveTextSplitter(
@@ -246,7 +276,8 @@ def summarize_ingredient_wikipedia(id, source):
         ingredient_id=int(id), 
         summary=result.summary, 
         warnings=result.warnings,
-        model=model
+        model=model,
+        sources=[source]
     )
 
     # RETURN

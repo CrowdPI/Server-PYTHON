@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from sqlalchemy.dialects.postgresql import ARRAY
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -79,4 +80,5 @@ class Summary(Base):
     text = Column(Text, nullable=False)
     warnings = Column(Text, nullable=True)
     model = Column(Text, nullable=False)
+    sources = Column(ARRAY(Text), nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)

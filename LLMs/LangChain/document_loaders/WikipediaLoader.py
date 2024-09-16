@@ -1,4 +1,6 @@
-from langchain.document_loaders import WikipediaLoader
+# DOCS: https://python.langchain.com/v0.2/docs/integrations/document_loaders/wikipedia/
+
+from langchain_community.document_loaders import WikipediaLoader
 
 class LangChain_WikipediaLoader:
     def __init__(self, query, load_max_docs=1):
