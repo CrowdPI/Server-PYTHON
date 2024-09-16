@@ -78,7 +78,7 @@ def get_ingredient(id):
 # ROUTES > LLMs : summarize ingredient
 
 @ingredients_blueprint.route('/ingredients/<id>/summarize', methods=['PUT']) # TODO: add a query param for model and set default to "gpt-4o"
-def summarize_ingredient(id):
+def summarize_ingredient_single_source(id):
     # EXTRACT: model from query
     model = request.args.get('model', 'gpt-4o')
     print(f'THE MODEL\n{model}')
