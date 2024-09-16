@@ -322,8 +322,17 @@ def summarize_ingredient_toolchain(id, version=2):
             First, use the WikipediaLoader tool to fetch information about the ingredient. 
             Then, based on that information, provide a summary and any potential health warnings.
         """)
-        print(f'WHAT IS THE RESULT\n{result}')
-        print(f'WHAT ARE THE TOOL CALLS\n{result.tool_calls}')
+        # result = llm_with_tools.invoke(f"""
+        #     Please summarize the following ingredient: {ingredient}. 
+        #     First, use the WikipediaLoader tool to fetch information about the ingredient. 
+        #     Then, based on that information, provide a summary and any potential health warnings.
+        # """)
+
+        # Inline serialization for non-serializable objects
+        result_json = json.dumps(result, default=lambda o: o.__dict__ if hasattr(o, '__dict__') else str(o), indent=4)
+        tool_calls_json = json.dumps(result.tool_calls, default=lambda o: o.__dict__ if hasattr(o, '__dict__') else str(o), indent=4)
+
+        print(f'WHAT IS THE RESULT\n{result_json}')
 
         # UPDATE > ingredient summary
         summary_data = {
