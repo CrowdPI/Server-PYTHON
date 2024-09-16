@@ -2,6 +2,13 @@ __version__ = "0.0.4"
 
 CHANGE_LOG = [
     {
+        "version": "0.0.6",
+        "date": "09-16-2024",
+        "changes": [
+            "Removed the 'structured response' (summary & warnings) requirement from the /toolchain route. Still not calling tools",
+        ]
+    },
+    {
         "version": "0.0.5",
         "date": "09-15-2024",
         "changes": [

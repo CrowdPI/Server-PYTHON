@@ -6,9 +6,9 @@ from sqlAlchemy import session
 def PostIngredientSummary(
     ingredient_id, 
     summary, 
-    warnings, 
     model,
     sources,
+    warnings=None, 
 ):
     new_summary = Summary(
         ingredient_id=ingredient_id,

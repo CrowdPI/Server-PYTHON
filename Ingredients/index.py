@@ -300,13 +300,14 @@ def summarize_ingredient_toolchain(id):
         model=model,
         temperature=0,
         max_tokens=None,
-        json_mode=True
+        # json_mode=True
         # logprobs=
         # stream_options=
     )
 
     # CONFIGURE: tools
-    CLASS_INSTANCE_ChatOpenAI.llm.bind_tools([
+    # CLASS_INSTANCE_ChatOpenAI.llm.bind_tools([
+    CLASS_INSTANCE_ChatOpenAI.get_llm().bind_tools([
         # TODO: 
         #       - I want this WikipediaLoader Tool to update the "context" / "retriever" 
         #           that is then passed into the TOOL_RagChain to actually answer the question
@@ -319,46 +320,29 @@ def summarize_ingredient_toolchain(id):
         # TOOL_RagChain,
     ])
 
-    # CONFIGURE: structured llm instance
-    class ChatOpenAI_Summary(BaseModel):
-        """
-        Summarize a specified dietary ingredient.
-        """
-        summary: str = Field(description="The summary of the specified dietary ingredient.")
-        warnings: str = Field(description="A highlight of any potential health risks associated with the specified dietary ingredient.")
-    structured_llm = CLASS_INSTANCE_ChatOpenAI.llm.with_structured_output(ChatOpenAI_Summary)
-
     # INVOKE: structured LLM w/ tools
-    # 🚨 V1 - Incorrectly Immediely Anwering the Question WITHOUT tool calls
-    result = structured_llm.invoke(f"""
+    # 🚨 V1 - Not Calling Tools
+    llm = CLASS_INSTANCE_ChatOpenAI.get_llm()
+    result = llm.invoke(f"""
         Please summarize the following ingredient: {ingredient.name}. 
         First, use the WikipediaLoader tool to fetch information about the ingredient. 
         Then, based on that information, provide a summary and any potential health warnings.
     """)
     print(f'WHAT IS THE RESULT\n{result}')
+    print(f'WHAT ARE THE TOOL CALLS\n{result.tool_calls}') ## TODO: there are none!
 
     # UPDATE > ingredient summary
-    PostIngredientSummary(
-        ingredient_id=int(id), 
-        summary=result.summary, 
-        warnings=result.warnings,
-        model=model,
-        sources=['toolchain:', 'wikipedia']
-    )
+    summary_data = {
+        'ingredient_id': int(id),
+        'summary': result.content, 
+        'model': model,
+        'sources': ['toolchain:', 'wikipedia']
+    }
+    if hasattr(result, 'warnings'):
+        if result.warnings:
+            summary_data['warnings'] = result.warnings
 
-    # # 🔎 V2 - what i initially wanted to do
-    # #         - i know the retriever is wrong here but pseudo this is what im trying to do  
-    # # print(f'WHAT ARE THE TOOL CALLS\n{result.tool_calls}') ## TODO: there are none!
-    # blarg = TOOL_RagChain(
-    #     prompt=f"""
-    #         Please summarize the following ingredient: {ingredient.name}.     
-    #     """,
-    #     retriever=TOOL_LangChain_WikipediaLoader.retriever,
-    #     llm=structured_llm
-    # )
-    # # V2 - 🔎 Result
-    # print(f'V2 Result.summary\n{blarg.summary}')
-    # print(f'V2 Result.warnings\n{blarg.warnings}')
+    PostIngredientSummary(**summary_data)
 
     # RETURN
     return jsonify('success'), 200
