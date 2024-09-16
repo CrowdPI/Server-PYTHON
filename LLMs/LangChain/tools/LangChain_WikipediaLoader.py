@@ -14,7 +14,8 @@ def TOOL_LangChain_WikipediaLoader(ingredient, version=2):
     """
     # CONVERT: Wikipedia page into individual "documents"
     CLASS_INSTANCE_LangChain_WikipediaLoader = LangChain_WikipediaLoader(
-        query=ingredient.name
+        # query=ingredient.name
+        query=ingredient
     )
     documents = CLASS_INSTANCE_LangChain_WikipediaLoader.call_loader()
     # print(f'THE DOCUMENTS\n{documents}')
@@ -73,7 +74,7 @@ def TOOL_LangChain_WikipediaLoader(ingredient, version=2):
 
         # INVOKE: rag chain
         result = rag_chain.invoke(f"""
-            Please summarize the following cooking ingredient: {ingredient.name}
+            Please summarize the following cooking ingredient: {ingredient}
         """)
         print(f'TOOL_LangChain_WikipediaLoader Result\n{result}')
         return result
