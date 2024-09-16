@@ -342,7 +342,8 @@ def summarize_ingredient_toolchain(id):
         ingredient_id=int(id), 
         summary=result.summary, 
         warnings=result.warnings,
-        model=model
+        model=model,
+        sources=['toolchain:', 'wikipedia']
     )
 
     # # 🔎 V2 - what i initially wanted to do
