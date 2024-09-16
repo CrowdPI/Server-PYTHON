@@ -26,7 +26,7 @@ from langchain.prompts import PromptTemplate
 from langchain.schema.output_parser import StrOutputParser
 from typing import Optional
 # IMPORT > LLMs
-# IMPORT > LLMs
+from langchain_openai import ChatOpenAI
 from langchain_core.documents import Document
 from LLMs.LangChain.text_splitters.RecursiveCharacterTextSplitter import LangChain_RecursiveTextSplitter
 from LLMs.LangChain.vector_stores.Chroma.index import LangChain_Chroma
@@ -286,7 +286,7 @@ def summarize_ingredient_ragchain(id, source):
 
 
 @ingredients_blueprint.route('/ingredients/<id>/summarize/toolchain', methods=['PUT'])
-def summarize_ingredient_toolchain(id):
+def summarize_ingredient_toolchain(id, version=2):
     # EXTRACT: model from query
     model = request.args.get('model', 'gpt-4o')
 
@@ -295,54 +295,104 @@ def summarize_ingredient_toolchain(id):
     if (ingredient is None or ingredient.wikipedia is None):
         return jsonify({"error": "Ingredient or Wikipedia page not found"}), 204
 
-    # CREATE: structured llm instance
-    CLASS_INSTANCE_ChatOpenAI = LangChain_OpenAI_ChatOpenAI(
-        model=model,
-        temperature=0,
-        max_tokens=None,
-        # json_mode=True
-        # logprobs=
-        # stream_options=
-    )
+    if version == 2:
+        # CREATE: llm instance
+        llm = ChatOpenAI(
+            model=model,
+            temperature=0,
+            max_tokens=None,
+            # logprobs=
+            # stream_options=
+        )
 
-    # CONFIGURE: tools
-    # CLASS_INSTANCE_ChatOpenAI.llm.bind_tools([
-    CLASS_INSTANCE_ChatOpenAI.get_llm().bind_tools([
-        # TODO: 
-        #       - I want this WikipediaLoader Tool to update the "context" / "retriever" 
-        #           that is then passed into the TOOL_RagChain to actually answer the question
-        #       - I envision having many specific page loaders that I want to feed into the overall 
-        #           context BEFORE the question is attempted to be answered
-        TOOL_LangChain_WikipediaLoader,
+        # BIND: tools to llm instance
+        llm_with_tools = llm.bind_tools([
+            TOOL_LangChain_WikipediaLoader,
 
-        # TOOL_LangChain_PubMedLoader, 
-        
-        # TOOL_RagChain,
-    ])
+            # TOOL_LangChain_PubMedLoader, 
+            # TOOL_RagChain,
+        ])
+        # Debugging: Print bound tools
+        # print(f'DEBUG: Bound Tools: {llm.tools}')  # THERE ARE NO ATTACHED TOOLS!! Check if tools are bound
 
-    # INVOKE: structured LLM w/ tools
-    # 🚨 V1 - Not Calling Tools
-    llm = CLASS_INSTANCE_ChatOpenAI.get_llm()
-    result = llm.invoke(f"""
-        Please summarize the following ingredient: {ingredient.name}. 
-        First, use the WikipediaLoader tool to fetch information about the ingredient. 
-        Then, based on that information, provide a summary and any potential health warnings.
-    """)
-    print(f'WHAT IS THE RESULT\n{result}')
-    print(f'WHAT ARE THE TOOL CALLS\n{result.tool_calls}') ## TODO: there are none!
+        # INVOKE: structured LLM w/ tools
+        result = llm_with_tools.invoke(f"""
+            Please summarize the following ingredient: {ingredient.name}. 
+            First, use the WikipediaLoader tool to fetch information about the ingredient. 
+            Then, based on that information, provide a summary and any potential health warnings.
+        """)
+        print(f'WHAT IS THE RESULT\n{result}')
+        print(f'WHAT ARE THE TOOL CALLS\n{result.tool_calls}') ## TODO: there are none!
 
-    # UPDATE > ingredient summary
-    summary_data = {
-        'ingredient_id': int(id),
-        'summary': result.content, 
-        'model': model,
-        'sources': ['toolchain:', 'wikipedia']
-    }
-    if hasattr(result, 'warnings'):
-        if result.warnings:
-            summary_data['warnings'] = result.warnings
+        # UPDATE > ingredient summary
+        summary_data = {
+            'ingredient_id': int(id),
+            'summary': result.content, 
+            'model': model,
+            'sources': ['toolchain:', 'wikipedia']
+        }
+        if hasattr(result, 'warnings'):
+            if result.warnings:
+                summary_data['warnings'] = result.warnings
 
-    PostIngredientSummary(**summary_data)
+        PostIngredientSummary(**summary_data)
 
-    # RETURN
-    return jsonify('success'), 200
+        # RETURN
+        return jsonify('success'), 200
+
+    if version == 1:
+        # CREATE: llm instance
+        CLASS_INSTANCE_ChatOpenAI = LangChain_OpenAI_ChatOpenAI(
+            model=model,
+            temperature=0,
+            max_tokens=None,
+            # json_mode=True
+            # logprobs=
+            # stream_options=
+        )
+
+        # CONFIGURE: tools
+        CLASS_INSTANCE_ChatOpenAI.bind_tools([
+        # CLASS_INSTANCE_ChatOpenAI.llm.bind_tools([
+        # CLASS_INSTANCE_ChatOpenAI.get_llm().bind_tools([
+            # TODO: 
+            #       - I want this WikipediaLoader Tool to update the "context" / "retriever" 
+            #           that is then passed into the TOOL_RagChain to actually answer the question
+            #       - I envision having many specific page loaders that I want to feed into the overall 
+            #           context BEFORE the question is attempted to be answered
+            TOOL_LangChain_WikipediaLoader,
+
+            # TOOL_LangChain_PubMedLoader, 
+            
+            # TOOL_RagChain,
+        ])
+        # Debugging: Print bound tools
+        print(f'DEBUG: Bound Tools: {CLASS_INSTANCE_ChatOpenAI.llm.tools}')  # Check if tools are bound
+
+
+        # INVOKE: structured LLM w/ tools
+        # 🚨 V1 - Not Calling Tools
+        llm = CLASS_INSTANCE_ChatOpenAI.get_llm()
+        result = llm.invoke(f"""
+            Please summarize the following ingredient: {ingredient.name}. 
+            First, use the WikipediaLoader tool to fetch information about the ingredient. 
+            Then, based on that information, provide a summary and any potential health warnings.
+        """)
+        print(f'WHAT IS THE RESULT\n{result}')
+        print(f'WHAT ARE THE TOOL CALLS\n{result.tool_calls}') ## TODO: there are none!
+
+        # UPDATE > ingredient summary
+        summary_data = {
+            'ingredient_id': int(id),
+            'summary': result.content, 
+            'model': model,
+            'sources': ['toolchain:', 'wikipedia']
+        }
+        if hasattr(result, 'warnings'):
+            if result.warnings:
+                summary_data['warnings'] = result.warnings
+
+        PostIngredientSummary(**summary_data)
+
+        # RETURN
+        return jsonify('success'), 200

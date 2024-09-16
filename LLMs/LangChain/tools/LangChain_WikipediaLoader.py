@@ -7,7 +7,7 @@ from LLMs.LangChain.document_loaders.WikipediaLoader import LangChain_WikipediaL
 from LLMs.LangChain.vector_stores.Chroma.index import LangChain_Chroma
 
 @tool
-def TOOL_LangChain_WikipediaLoader(ingredient, version=1):
+def TOOL_LangChain_WikipediaLoader(ingredient, version=2):
     """
         Tool to add to the over all LLMs context w/ wikipedia data.
         I do NOT want this to simply answer the question as this tool will be in a line of tools available to append valuable inforamtion to the context PRIOR to answering the question.
@@ -73,7 +73,8 @@ def TOOL_LangChain_WikipediaLoader(ingredient, version=1):
 
         # INVOKE: rag chain
         result = rag_chain.invoke(f"""
-            Please summarize the following cooking ingredient:
+            Please summarize the following cooking ingredient: {ingredient.name}
         """)
+        print(f'TOOL_LangChain_WikipediaLoader Result\n{result}')
         return result
 

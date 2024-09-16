@@ -6,6 +6,7 @@ CHANGE_LOG = [
         "date": "09-16-2024",
         "changes": [
             "Removed the 'structured response' (summary & warnings) requirement from the /toolchain route. Still not calling tools",
+            "Added 'version=2' to /toolchain route that is NOT using the extracted class. Tools are being called but no actual response",
         ]
     },
     {
