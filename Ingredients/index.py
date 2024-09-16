@@ -292,7 +292,7 @@ def summarize_ingredient_toolchain(id):
         """
         summary: str = Field(description="The summary of the specified dietary ingredient.")
         warnings: str = Field(description="A highlight of any potential health risks associated with the specified dietary ingredient.")
-    structured_llm = llm.with_structured_output(ChatOpenAI_Summary)
+    structured_llm = CLASS_INSTANCE_ChatOpenAI.llm.with_structured_output(ChatOpenAI_Summary)
 
     # INVOKE: structured LLM w/ tools
     # 🚨 V1 - Incorrectly Immediely Anwering the Question WITHOUT tool calls
