@@ -38,6 +38,7 @@ from LLMs.LangChain.document_loaders.PubMedLoader import LangChain_PubMedLoader
 from LLMs.LangChain.document_loaders.WikipediaLoader import LangChain_WikipediaLoader
 # IMPORT > LLMs > tools
 from LLMs.LangChain.tools.LangChain_WikipediaLoader import TOOL_LangChain_WikipediaLoader
+from LLMs.LangChain.tools.LangChain_PubMedLoader import TOOL_LangChain_PubMedLoader
 # IMPORT > tools
 from tools.RagChain import TOOL_RagChain
 
@@ -145,7 +146,7 @@ def summarize_ingredient(id):
     return jsonify('success'), 200
 
 @ingredients_blueprint.route('/ingredients/<id>/summarize/source/<source>', methods=['PUT'])
-def summarize_ingredient_wikipedia(id, source):
+def summarize_ingredient(id, source):
     """
     Summarize ingredient information from a specified source.
 
@@ -311,7 +312,9 @@ def summarize_ingredient_toolchain(id):
         #           that is then passed into the TOOL_RagChain to actually answer the question
         #       - I envision having many specific page loaders that I want to feed into the overall 
         #           context BEFORE the question is attempted to be answered
-        TOOL_LangChain_WikipediaLoader, 
+        TOOL_LangChain_WikipediaLoader,
+
+        # TOOL_LangChain_PubMedLoader, 
         
         # TOOL_RagChain,
     ])
