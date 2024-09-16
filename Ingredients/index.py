@@ -313,7 +313,8 @@ def summarize_ingredient_toolchain(id, version=2):
             # TOOL_RagChain,
         ])
         # Debugging: Print bound tools
-        # print(f'DEBUG: Bound Tools: {llm.tools}')  # THERE ARE NO ATTACHED TOOLS!! Check if tools are bound
+        # print(f'DEBUG: Bound Tools: {llm.tools}')
+        # print(f'DEBUG: Bound Tools: {llm_with_tools.tools}')
 
         # INVOKE: structured LLM w/ tools
         result = llm_with_tools.invoke(f"""
@@ -322,7 +323,7 @@ def summarize_ingredient_toolchain(id, version=2):
             Then, based on that information, provide a summary and any potential health warnings.
         """)
         print(f'WHAT IS THE RESULT\n{result}')
-        print(f'WHAT ARE THE TOOL CALLS\n{result.tool_calls}') ## TODO: there are none!
+        print(f'WHAT ARE THE TOOL CALLS\n{result.tool_calls}')
 
         # UPDATE > ingredient summary
         summary_data = {
