@@ -29,6 +29,7 @@ class LangChain_OpenAI_ChatOpenAI:
 
     def bind_tools(self, tools):
         self.llm.bind_tools(tools)
+        return self.llm
 
     def get_llm(self):
         return self.llm
