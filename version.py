@@ -4,6 +4,7 @@ CHANGE_LOG = [
         "date": "09-16-2024",
         "changes": [
             "Moved /products route to appropriate directory w/ blueprint",
+            "ROUTE (GET): /products/<product_id>",
         ]
     },
     {
@@ -65,4 +66,4 @@ CHANGE_LOG = [
     }
 ]
 
-__version__ = CHANGE_LOG[0].version
+__version__ = CHANGE_LOG[0]["version"]
