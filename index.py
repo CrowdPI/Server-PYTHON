@@ -6,6 +6,7 @@ from flask import Flask, request, jsonify
 # IMPORTS > routes
 from Ingredients.index import ingredients_blueprint
 from Summaries.index import summaries_blueprint
+from Products.index import products_blueprint
 
 # IMPORTS > SQLAlchemy
 from sqlAlchemy import session
@@ -17,9 +18,7 @@ from database import db
 from flask_cors import CORS
 
 # IMPORTS > models
-from models import Ingredient
 from models import Product
-from models import Summary
 
 # IMPORTS > consts
 from version import CHANGE_LOG
@@ -50,11 +49,8 @@ def hello_world():
 def get_changelog():
     return jsonify({"changelog": CHANGE_LOG}), 200
 
-# ROUTES > Products
-@server.route('/products', methods=["GET"])
-def get_products():
-    products = session.query(Product).order_by(Product.name.asc()).all()
-    return jsonify([{"id": ing.id,"brand_name": ing.brand_name, "name": ing.name} for ing in products]), 200
+# REGISTER > Products blueprint
+server.register_blueprint(products_blueprint)
 
 # REGISTER > Ingredients blueprint
 server.register_blueprint(ingredients_blueprint)

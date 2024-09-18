@@ -1,6 +1,11 @@
-__version__ = "0.0.4"
-
 CHANGE_LOG = [
+    {
+        "version": "0.0.7",
+        "date": "09-16-2024",
+        "changes": [
+            "Moved /products route to appropriate directory w/ blueprint",
+        ]
+    },
     {
         "version": "0.0.6",
         "date": "09-16-2024",
@@ -59,3 +64,5 @@ CHANGE_LOG = [
         ]
     }
 ]
+
+__version__ = CHANGE_LOG[0].version

@@ -42,9 +42,6 @@ from LLMs.LangChain.tools.LangChain_PubMedLoader import TOOL_LangChain_PubMedLoa
 # IMPORT > tools
 from tools.RagChain import TOOL_RagChain
 
-# IMPORT > subrouter
-ingredients_blueprint = Blueprint('ingredients', __name__)
-
 # IMPORT > models
 from Ingredients.models.PostIngredientSummary import PostIngredientSummary
 
@@ -53,6 +50,9 @@ from Ingredients.models.PostIngredientSummary import PostIngredientSummary
 ####################
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
+
+# CREATE > subrouter
+ingredients_blueprint = Blueprint('ingredients', __name__)
 
 @ingredients_blueprint.route('/ingredients', methods=["GET"])
 def get_ingredients():
