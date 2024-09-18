@@ -1,6 +1,7 @@
 # IMPORTS
 import os
 import json
+import time  # Add this import at the top
 
 # IMPORTS > database
 from sqlAlchemy import session
@@ -30,3 +31,22 @@ def get_product(product_id):
         "brand_name": ingredient.brand_name or None,
         "name": ingredient.name,
     }), 200
+
+@products_blueprint.route('/products/<product_id>/upload-img', methods=['POST'])
+def upload_img(product_id):
+    # Get the uploaded file from the request
+    uploaded_file = request.files.get('image')
+    print(f'UPLOADED FILE\n{uploaded_file}')
+    
+    if uploaded_file:
+        # Format the filename
+        timestamp = int(time.time())  # Get current timestamp
+        filename = f"product_id:{product_id}_{timestamp}.jpg"  # Assuming the file is a JPEG
+        upload_path = os.path.join('USER_PHOTO_UPLOADS', filename)  # Define the upload path
+        
+        # Save the file
+        uploaded_file.save(upload_path)
+        print(f'File saved: {upload_path}')
+        return jsonify({"message": "Image uploaded successfully"}), 200
+    
+    return jsonify({"error": "No file uploaded"}), 400

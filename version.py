@@ -5,6 +5,7 @@ CHANGE_LOG = [
         "changes": [
             "Moved /products route to appropriate directory w/ blueprint",
             "ROUTE (GET): /products/<product_id>",
+            "ROUTE (POST): /products/<product_id>/upload-img => local server file storage => no processing yet"
         ]
     },
     {
