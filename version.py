@@ -1,5 +1,12 @@
 CHANGE_LOG = [
     {
+        "version": "0.0.8",
+        "date": "10-1-2024",
+        "changes": [
+            "Removed all old code versions. Prepping for official push knowing Chains / Agents / Graphs",
+        ]
+    },
+    {
         "version": "0.0.7",
         "date": "09-16-2024",
         "changes": [
